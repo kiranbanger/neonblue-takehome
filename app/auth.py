@@ -1,8 +1,8 @@
 """
 Authentication module for the experimentation platform
 """
-from fastapi import HTTPException, Header, status
-from typing import Optional
+from fastapi import HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Valid tokens (can be moved to environment variables or database)
 VALID_TOKENS = {
@@ -10,39 +10,35 @@ VALID_TOKENS = {
     "demo-token-456",
 }
 
+# Create security scheme
+security = HTTPBearer()
 
-async def verify_token(authorization: Optional[str] = Header(None)) -> str:
+
+async def verify_token(credentials: HTTPAuthorizationCredentials = None) -> str:
     """
-    Verify Bearer token from Authorization header
-    
+    Verify Bearer token using FastAPI security
+
     Args:
-        authorization: Authorization header value
-        
+        credentials: HTTP credentials from Authorization header
+
     Returns:
         The token if valid
-        
+
     Raises:
-        HTTPException: If token is missing or invalid
+        HTTPException: If token is invalid
     """
-    if not authorization:
+    if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authorization header"
+            detail="Missing authentication credentials"
         )
 
-    # Extract token from "Bearer <token>" format
-    parts = authorization.split()
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization header format"
-        )
+    token = credentials.credentials
 
-    token = parts[1]
     if token not in VALID_TOKENS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token"
+            detail="Invalid authentication credentials"
         )
 
     return token
