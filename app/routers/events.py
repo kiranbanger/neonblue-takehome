@@ -60,6 +60,8 @@ async def record_event(
         "client_id": event.client_id,
         "event_type": event.event_type,
         "timestamp": event.timestamp.isoformat(),
-        "properties": event.properties
+        "properties": event.properties,
+        "created_at": event.created_at.isoformat(),
+        "updated_at": event.updated_at.isoformat()
     }
 

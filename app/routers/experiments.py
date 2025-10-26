@@ -66,7 +66,7 @@ async def create_experiment(
     db.commit()
     db.refresh(experiment)
 
-    return experiment.to_dict()
+    return experiment.to_dict() # TODO don't return client_id or variant_id
 
 
 @router.get("/{experiment_id}/assignment/{user_id}")
@@ -100,7 +100,8 @@ async def get_assignment(
             "variant_id": existing_assignment.variant_id,
             "variant_name": variant.name,
             "user_id": existing_assignment.user_id,
-            "assigned_at": existing_assignment.assigned_at.isoformat()
+            "created_at": existing_assignment.created_at.isoformat(),
+            "updated_at": existing_assignment.updated_at.isoformat()
         }
 
     # Assign user to variant based on traffic allocation
@@ -138,7 +139,8 @@ async def get_assignment(
         "variant_id": assignment.variant_id,
         "variant_name": selected_variant.name,
         "user_id": assignment.user_id,
-        "assigned_at": assignment.assigned_at.isoformat()
+        "created_at": assignment.created_at.isoformat(),
+        "updated_at": assignment.updated_at.isoformat()
     }
 
 
@@ -190,7 +192,7 @@ async def get_results(
         for assignment in variant_assignments:
             user_events = events_query.filter(
                 Event.user_id == assignment.user_id,
-                Event.timestamp >= assignment.assigned_at
+                Event.timestamp >= assignment.created_at
             ).all()
             variant_events.extend(user_events)
 

@@ -4,7 +4,7 @@ Database models for the experimentation platform
 from sqlalchemy import Column, String, Float, DateTime, JSON, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, UTC, timezone
 import uuid
 
 Base = declarative_base()
@@ -19,8 +19,8 @@ class Experiment(Base):
     description = Column(String(255))
     client_id = Column(Integer, nullable=False)
     status = Column(String(50), default="active")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(tz=UTC))
+    updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
 
     variants = relationship("Variant", back_populates="experiment", cascade="all, delete-orphan")
     assignments = relationship("UserAssignment", back_populates="experiment", cascade="all, delete-orphan")
@@ -46,8 +46,8 @@ class Variant(Base):
     experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False)
     name = Column(String(255), nullable=False)
     traffic_allocation = Column(Float, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(tz=UTC))
+    updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
 
     experiment = relationship("Experiment", back_populates="variants")
 
@@ -55,7 +55,9 @@ class Variant(Base):
         return {
             "id": self.id,
             "name": self.name,
-            "traffic_allocation": self.traffic_allocation
+            "traffic_allocation": self.traffic_allocation,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
 
 
@@ -67,9 +69,8 @@ class UserAssignment(Base):
     experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False)
     variant_id = Column(Integer, ForeignKey("variants.id"), nullable=False)
     user_id = Column(String(255), nullable=False)
-    assigned_at = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(tz=UTC))
+    updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
 
     experiment = relationship("Experiment", back_populates="assignments")
 
@@ -79,7 +80,8 @@ class UserAssignment(Base):
             "experiment_id": self.experiment_id,
             "variant_id": self.variant_id,
             "user_id": self.user_id,
-            "assigned_at": self.assigned_at.isoformat()
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
 
 
@@ -93,7 +95,8 @@ class Event(Base):
     event_type = Column(String(100), nullable=False)
     timestamp = Column(DateTime, nullable=False)
     properties = Column(JSON, default={})
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(tz=UTC))
+    updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
 
     def to_dict(self):
         return {
@@ -102,6 +105,8 @@ class Event(Base):
             "client_id": self.client_id,
             "event_type": self.event_type,
             "timestamp": self.timestamp.isoformat(),
-            "properties": self.properties
+            "properties": self.properties,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
 
