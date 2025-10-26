@@ -1,7 +1,7 @@
 """
 Authentication module for the experimentation platform
 """
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Valid tokens (can be moved to environment variables or database)
@@ -14,12 +14,12 @@ VALID_TOKENS = {
 security = HTTPBearer()
 
 
-async def verify_token(credentials: HTTPAuthorizationCredentials = None) -> str:
+async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     """
-    Verify Bearer token using FastAPI security
+    Verify Bearer token from Authorization header
 
     Args:
-        credentials: HTTP credentials from Authorization header
+        credentials: HTTP credentials from Authorization header (extracted by HTTPBearer)
 
     Returns:
         The token if valid
