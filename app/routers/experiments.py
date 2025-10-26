@@ -28,10 +28,10 @@ class ExperimentInput(BaseModel):
     variants: List[VariantInput]
 
 
-@router.post("", status_code=201)
+@router.post("/", status_code=201)
 async def create_experiment(
     data: ExperimentInput,
-    token: str = Depends(verify_token),
+    client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Create a new experiment with variants"""
@@ -49,13 +49,13 @@ async def create_experiment(
         id=str(uuid.uuid4()),
         name=data.name,
         description=data.description,
+        client_id=client_id,
         status="active"
     )
 
     # Create variants
     for variant_data in data.variants:
         variant = Variant(
-            id=str(uuid.uuid4()),
             experiment_id=experiment.id,
             name=variant_data.name,
             traffic_allocation=variant_data.traffic_allocation
@@ -73,13 +73,13 @@ async def create_experiment(
 async def get_assignment(
     experiment_id: str,
     user_id: str,
-    token: str = Depends(verify_token),
+    client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Get user's variant assignment (idempotent)"""
     
     # Check if experiment exists
-    experiment = db.query(Experiment).filter(Experiment.id == experiment_id).first()
+    experiment = db.query(Experiment).filter(Experiment.id == experiment_id, Experiment.client_id == client_id).first()
     if not experiment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -148,7 +148,7 @@ async def get_results(
     event_type: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    token: str = Depends(verify_token),
+    client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Get experiment performance summary"""
@@ -156,7 +156,7 @@ async def get_results(
     from datetime import datetime
 
     # Check if experiment exists
-    experiment = db.query(Experiment).filter(Experiment.id == experiment_id).first()
+    experiment = db.query(Experiment).filter(Experiment.id == experiment_id, Experiment.client_id == client_id).first()
     if not experiment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

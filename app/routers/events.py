@@ -23,10 +23,10 @@ class EventInput(BaseModel):
     properties: Optional[Dict[str, Any]] = None
 
 
-@router.post("", status_code=201)
+@router.post("/", status_code=201)
 async def record_event(
     data: EventInput,
-    token: str = Depends(verify_token),
+    client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Record an event"""
@@ -44,6 +44,7 @@ async def record_event(
     event = Event(
         id=str(uuid.uuid4()),
         user_id=data.user_id,
+        client_id=client_id,
         event_type=data.type,
         timestamp=event_timestamp,
         properties=data.properties or {}
@@ -56,6 +57,7 @@ async def record_event(
     return {
         "id": event.id,
         "user_id": event.user_id,
+        "client_id": event.client_id,
         "event_type": event.event_type,
         "timestamp": event.timestamp.isoformat(),
         "properties": event.properties

@@ -4,17 +4,22 @@ Authentication module for the experimentation platform
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-# Valid tokens (can be moved to environment variables or database)
+# Valid tokens and client_ids (can be moved to environment variables or database)
 VALID_TOKENS = {
     "test-token-123",
     "demo-token-456",
+}
+
+token_client_id_map = {
+    "test-token-123" : 1,
+    "demo-token-456" : 2
 }
 
 # Create security scheme
 security = HTTPBearer()
 
 
-async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
     """
     Verify Bearer token from Authorization header
 
@@ -22,7 +27,7 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
         credentials: HTTP credentials from Authorization header (extracted by HTTPBearer)
 
     Returns:
-        The token if valid
+        The client_id if valid
 
     Raises:
         HTTPException: If token is invalid
@@ -41,5 +46,4 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
             detail="Invalid authentication credentials"
         )
 
-    return token
-
+    return token_client_id_map[token]
