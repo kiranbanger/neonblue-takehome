@@ -52,9 +52,6 @@ Once the containers are running:
 - **FastAPI Application**: http://localhost:5000
 - **API Documentation**: http://localhost:5000/docs
 - **MySQL Database**: localhost:3306
-  - Username: `app_user`
-  - Password: `app_password`
-  - Database: `experiments_db`
 
 ### Stopping the Containers
 
