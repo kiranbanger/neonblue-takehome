@@ -23,17 +23,6 @@ VALID_TOKENS=test-token-123,demo-token-456
 TOKEN_CLIENT_ID_MAP=test-token-123:1,demo-token-456:2
 ```
 
-**Configuration Details:**
-- **MYSQL_ROOT_PASSWORD**: Root password for MySQL database
-- **MYSQL_DATABASE**: Name of the database to create
-- **MYSQL_USER**: Database user for the application
-- **MYSQL_PASSWORD**: Password for the database user
-- **MYSQL_HOST**: MySQL host (use `mysql` for Docker, `localhost` for local development)
-- **MYSQL_PORT**: MySQL port
-- **DATABASE_URL**: Full database connection string
-- **VALID_TOKENS**: Comma-separated list of valid API authentication tokens
-- **TOKEN_CLIENT_ID_MAP**: Mapping of tokens to client IDs (format: `token:id,token:id`)
-
 ## Running the Docker Containers
 
 ```bash
