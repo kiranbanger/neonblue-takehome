@@ -7,7 +7,7 @@ BASE_URL="http://localhost:5000"
 TOKEN="test-token-123"
 
 # Arrays for random selection
-EVENT_TYPES=("click" "purchase" "signup")
+EVENT_TYPES=("click" "purchase" "signup" "")
 
 # Function to generate random properties JSON
 generate_properties() {
@@ -28,7 +28,7 @@ generate_properties() {
 # Function to make a curl request
 make_request() {
     local user_id=$2
-    local event_type=${EVENT_TYPES[$((RANDOM % 3))]}
+    local event_type=${EVENT_TYPES[$((RANDOM % 4))]}
     local properties=$(generate_properties)
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.000000Z")
 
@@ -153,8 +153,8 @@ for i in {1..1000}; do
 
     # Then post 5 events for this user
     echo "2. Posting 5 events for this user..."
-    for j in {1..2}; do
-        echo "   Event $j/2"
+    for j in {1..5}; do
+        echo "   Event $j/5"
         make_request "$i-$j" "$user_id"
         sleep 0.3
     done
@@ -163,5 +163,5 @@ for i in {1..1000}; do
     sleep 1
 done
 
-echo "All 1000 users with 2 events each completed! (2000 total events)"
+echo "All 1000 users with 5 events each completed! (5000 total events)"
 

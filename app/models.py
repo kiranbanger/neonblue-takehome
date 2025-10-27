@@ -1,10 +1,10 @@
 """
 Database models for the experimentation platform
 """
-from sqlalchemy import Column, String, Float, DateTime, JSON, ForeignKey, Integer
+from sqlalchemy import Column, String, Float, DateTime, JSON, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime, UTC, timezone
+from datetime import datetime, UTC
 import uuid
 
 Base = declarative_base()
@@ -17,7 +17,7 @@ class Experiment(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     description = Column(String(255))
-    client_id = Column(Integer, nullable=False)
+    client_id = Column(Integer, nullable=False, index=True)
     status = Column(String(50), default="active")
     created_at = Column(DateTime, default=datetime.now(tz=UTC))
     updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
@@ -43,7 +43,7 @@ class Variant(Base):
     __tablename__ = "variants"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False)
+    experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     traffic_allocation = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.now(tz=UTC))
@@ -66,13 +66,14 @@ class UserAssignment(Base):
     __tablename__ = "user_assignments"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False)
+    experiment_id = Column(String(36), ForeignKey("experiments.id"), nullable=False, index=True)
     variant_id = Column(Integer, ForeignKey("variants.id"), nullable=False)
-    user_id = Column(String(255), nullable=False)
+    user_id = Column(String(255), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.now(tz=UTC))
     updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
-
+    
     experiment = relationship("Experiment", back_populates="assignments")
+    __table_args__ = (UniqueConstraint('experiment_id', 'user_id', name='uix_experiment_user'),)
 
     def to_dict(self):
         return {
@@ -90,10 +91,10 @@ class Event(Base):
     __tablename__ = "events"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(255), nullable=False)
-    client_id = Column(Integer, nullable=False)
+    user_id = Column(String(255), nullable=False, index=True)
+    client_id = Column(Integer, nullable=False, index=True)
     event_type = Column(String(100), nullable=False)
-    timestamp = Column(DateTime, nullable=False)
+    timestamp = Column(DateTime, nullable=False, index=True)
     properties = Column(JSON, default={})
     created_at = Column(DateTime, default=datetime.now(tz=UTC))
     updated_at = Column(DateTime, default=datetime.now(tz=UTC), onupdate=datetime.now(tz=UTC))
