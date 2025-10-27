@@ -28,10 +28,7 @@ TOKEN_CLIENT_ID_MAP=test-token-123:1,demo-token-456:2
 ```bash
 docker compose up
 ```
-or if you're running an older version of Docker:
-```bash
-docker-compose up --build
-```
+
 This will:
 - Build/rebuild the FastAPI image with your latest code changes
 - Create and start both the MySQL and FastAPI containers
@@ -58,11 +55,11 @@ Once the containers are running:
 To stop the running containers:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 To stop and remove all data (including the database):
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
