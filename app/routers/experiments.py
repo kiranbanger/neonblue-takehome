@@ -112,14 +112,16 @@ async def get_assignment(
 
     cumulative = 0
     selected_variant = None
-    for variant in experiment.variants:
+    variants = experiment.variants
+    variants.sort(key=lambda x: x.id)
+    for variant in variants:
         cumulative += variant.traffic_allocation
         if random_value <= cumulative:
             selected_variant = variant
             break
 
     if not selected_variant:
-        selected_variant = experiment.variants[-1]
+        selected_variant = variants[-1]
 
     # Create assignment
     assignment = UserAssignment(
