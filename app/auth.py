@@ -1,19 +1,23 @@
 """
 Authentication module for the experimentation platform
 """
+import os
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
 
-# Valid tokens and client_ids (can be moved to environment variables or database)
-VALID_TOKENS = {
-    "test-token-123",
-    "demo-token-456",
-}
+load_dotenv()
 
-token_client_id_map = {
-    "test-token-123" : 1,
-    "demo-token-456" : 2
-}
+# Load valid tokens from environment variables
+_valid_tokens_str = os.getenv('VALID_TOKENS', 'test-token-123,demo-token-456')
+VALID_TOKENS = set(_valid_tokens_str.split(','))
+
+# Load token to client_id mapping from environment variables
+_token_client_id_str = os.getenv('TOKEN_CLIENT_ID_MAP', 'test-token-123:1,demo-token-456:2')
+token_client_id_map = {}
+for mapping in _token_client_id_str.split(','):
+    token, client_id = mapping.split(':')
+    token_client_id_map[token.strip()] = int(client_id.strip())
 
 # Create security scheme
 security = HTTPBearer()
