@@ -2,10 +2,6 @@
 
 ## Running the Docker Containers
 
-### First Time Setup or After Code Changes
-
-When running for the **first time** or after making **code changes** (Python files, Dockerfile, requirements.txt), use:
-
 ```bash
 docker compose up
 ```
