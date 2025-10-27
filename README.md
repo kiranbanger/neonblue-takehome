@@ -2,14 +2,19 @@
 
 ## Running the Docker Containers
 
-To create and run the Docker containers, use the following command:
+### First Time Setup or After Code Changes
 
+When running for the **first time** or after making **code changes** (Python files, Dockerfile, requirements.txt), use:
+
+```bash
+docker compose up
+```
+or if you're running an older version of Docker:
 ```bash
 docker-compose up --build
 ```
-
 This will:
-- Build the FastAPI image
+- Build/rebuild the FastAPI image with your latest code changes
 - Create and start both the MySQL and FastAPI containers
 - Link them together automatically
 - Start the FastAPI application on port 5000
@@ -18,7 +23,7 @@ This will:
 ### Prerequisites
 
 - Docker installed and running
-- Docker Compose installed
+- Docker Compose installed (depending on your Docker version)
 
 ### Accessing the Application
 
