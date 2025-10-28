@@ -53,6 +53,9 @@ Once the containers are running:
 ## Documentation
 
 For detailed API endpoint documentation and usage examples, see [API_USAGE.md](API_USAGE.md).
+
+Additional information can be found in [DESIGN.md](DESIGN.md).
+
 ### Stopping the Containers
 
 To stop the running containers:
