@@ -8,13 +8,12 @@ All of the code for the endpoints is in the routers directory. For a production 
 
 ## The Database Schema
 
-Updates:
-- Some table IDs are UUIDs and some are auto-incrementing integers. Database generageted integer IDs should not be exposed via the API to the clients/users, but are probably better for performance. The only way to know for sure would be to compare the performance of the two options, but the results of that comparison might change as the database evolves, so we might just include both UUIDs and auto-incrementing integers from the start so that we don't have to make major updates later. 
-- Remove the integer IDs from the return object in the models becuase they are not needed by the clients. 
-- Remove the created_at and updated_at fields from the models as well since those are mainly for auditing purposes and not useful to the clients.
+Improvements I might make:
+- Some table IDs are UUIDs and some are auto-incrementing integers. Database generated integer IDs should not be exposed via the API to the clients/users, but are probably better for performance. The only way to know for sure would be to compare the performance of the two options, but the results of that comparison might change as the database evolves, so we might just include both UUIDs and auto-incrementing integers from the start so that we don't have to make major updates later. 
 ---
 
 ## The Endpoints
+I would remove the integer IDs from the return object in the models becuase they are not needed by the clients. 
 
 The results endpoint returns a summary of the experiment, including:
 - the number of users assigned to each variant, 

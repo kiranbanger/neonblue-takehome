@@ -143,48 +143,67 @@ curl -X POST http://localhost:5000/events/ \
 ---
 
 ### 4. Get Experiment Results
-**GET** `/experiments/{experiment_id}/results`
+**GET** `/experiments/{experiment_id}/results/`
 
-Gets aggregated results for an experiment, including event counts and metrics per variant.
+Gets aggregated results for an experiment, including user counts and conversion rates per variant and event type.
 
-**Request:**
+**Query Parameters:**
+- `event_type` (optional): Filter results by specific event type(s). Can be a single value or multiple values.
+
+**Request (all event types):**
 ```bash
-curl -X GET http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440000/results \
+curl -X GET http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440000/results/ \
+  -H "Authorization: Bearer test-token-123" \
+  -H "Content-Type: application/json"
+```
+
+**Request (filter by event type):**
+```bash
+curl -X GET "http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440000/results/?event_type=purchase" \
   -H "Authorization: Bearer test-token-123" \
   -H "Content-Type: application/json"
 ```
 
 **Response (200 OK):**
 ```json
-{
-  "experiment_id": "550e8400-e29b-41d4-a716-446655440000",
-  "experiment_name": "Homepage Button Color Test",
-  "variants": [
-    {
-      "variant_id": "550e8400-e29b-41d4-a716-446655440001",
-      "variant_name": "control",
-      "users_assigned": 50,
-      "events": {
-        "click": 125,
-        "purchase": 8,
-        "signup": 3
-      },
-      "total_events": 136
-    },
-    {
-      "variant_id": "550e8400-e29b-41d4-a716-446655440002",
-      "variant_name": "treatment",
-      "users_assigned": 50,
-      "events": {
-        "click": 142,
-        "purchase": 12,
-        "signup": 5
-      },
-      "total_events": 159
-    }
-  ]
-}
+[
+  {
+    "variant_name": "control",
+    "user_count": 50,
+    "event_type": "click",
+    "user_count_event_type": 45,
+    "conversion_rate": 0.9
+  },
+  {
+    "variant_name": "control",
+    "user_count": 50,
+    "event_type": "purchase",
+    "user_count_event_type": 8,
+    "conversion_rate": 0.16
+  },
+  {
+    "variant_name": "treatment",
+    "user_count": 50,
+    "event_type": "click",
+    "user_count_event_type": 48,
+    "conversion_rate": 0.96
+  },
+  {
+    "variant_name": "treatment",
+    "user_count": 50,
+    "event_type": "purchase",
+    "user_count_event_type": 12,
+    "conversion_rate": 0.24
+  }
+]
 ```
+
+**Response Fields:**
+- `variant_name`: Name of the variant
+- `user_count`: Total number of unique users assigned to this variant
+- `event_type`: Type of event (click, purchase, signup, etc.)
+- `user_count_event_type`: Number of unique users who triggered this event type
+- `conversion_rate`: Ratio of users who triggered this event type to total users in variant
 
 ---
 
