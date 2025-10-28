@@ -56,6 +56,8 @@ For detailed API endpoint documentation and usage examples, see [API_USAGE.md](A
 
 Additional information can be found in [DESIGN.md](DESIGN.md).
 
+The script I used to generate data can be found here: [test_data.sh](test_data.sh).
+
 ### Stopping the Containers
 
 To stop the running containers:
