@@ -1,9 +1,9 @@
 """
 Experiments router for the experimentation platform
 """
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from pydantic import BaseModel, Field
+from typing import List, Optional, Union
 from sqlalchemy.orm import Session
 import uuid
 import hashlib
@@ -147,9 +147,10 @@ async def get_assignment(
     }
 
 
-@router.get("/{experiment_id}/results")
+@router.get("/{experiment_id}/results/")
 async def get_results(
     experiment_id: str,
+    event_type: Optional[Union[str, List[str]]] = Query(None),
     client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
@@ -193,6 +194,7 @@ async def get_results(
     user_count_by_variant_df = df.groupby('variant_name')['user_id'].nunique().reset_index()
     user_count_by_variant_df.rename(columns={"user_id": "user_count"}, inplace=True)
     user_count_by_variant_type_df = df.groupby(['variant_name', 'event_type'])['user_id'].nunique().reset_index()
+    user_count_by_variant_type_df = user_count_by_variant_type_df[user_count_by_variant_type_df['event_type'].isin(event_type)] if event_type else user_count_by_variant_type_df
     user_count_by_variant_type_df.rename(columns={"user_id": "user_count_event_type"}, inplace=True)
 
     agg_data = pd.merge(user_count_by_variant_df, user_count_by_variant_type_df, on='variant_name', how='left')
