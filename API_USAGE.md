@@ -198,13 +198,6 @@ curl -X GET "http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440
 ]
 ```
 
-**Response Fields:**
-- `variant_name`: Name of the variant
-- `user_count`: Total number of unique users assigned to this variant
-- `event_type`: Type of event (click, purchase, signup, etc.)
-- `user_count_event_type`: Number of unique users who triggered this event type
-- `conversion_rate`: Ratio of users who triggered this event type to total users in variant
-
 ---
 
 ## Error Responses
