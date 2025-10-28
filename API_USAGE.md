@@ -157,9 +157,16 @@ curl -X GET http://localhost:5000/experiments/550e8400-e29b-41d4-a716-4466554400
   -H "Content-Type: application/json"
 ```
 
-**Request (filter by event type):**
+**Request (filter by single event type):**
 ```bash
 curl -X GET "http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440000/results/?event_type=purchase" \
+  -H "Authorization: Bearer test-token-123" \
+  -H "Content-Type: application/json"
+```
+
+**Request (filter by multiple event types):**
+```bash
+curl -X GET "http://localhost:5000/experiments/550e8400-e29b-41d4-a716-446655440000/results/?event_type=purchase&event_type=signup" \
   -H "Authorization: Bearer test-token-123" \
   -H "Content-Type: application/json"
 ```
