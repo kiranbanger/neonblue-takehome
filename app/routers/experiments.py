@@ -7,8 +7,9 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 import uuid
 import hashlib
+import pandas as pd
 
-from app.models import Experiment, Variant, UserAssignment
+from app.models import Experiment, Variant, UserAssignment, Event
 from app.auth import verify_token
 from app.database import get_db
 
@@ -149,15 +150,10 @@ async def get_assignment(
 @router.get("/{experiment_id}/results")
 async def get_results(
     experiment_id: str,
-    event_type: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
     client_id: int = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Get experiment performance summary"""
-    from app.models import Event
-    from datetime import datetime
 
     # Check if experiment exists
     experiment = db.query(Experiment).filter(Experiment.id == experiment_id, Experiment.client_id == client_id).first()
@@ -167,63 +163,39 @@ async def get_results(
             detail="Experiment not found"
         )
 
-    # Get all assignments for this experiment
-    assignments = db.query(UserAssignment).filter(
-        UserAssignment.experiment_id == experiment_id
+    event_data = db.query(
+        UserAssignment.user_id,
+        Variant.name,
+        Event.id,
+        Event.event_type,
+        Event.properties
+    ).join(
+        Event, Event.user_id == UserAssignment.user_id
+    ).join(
+        Variant, Variant.id == UserAssignment.variant_id
+    ).filter(
+        UserAssignment.experiment_id == experiment_id,
+        Event.timestamp > UserAssignment.created_at
     ).all()
 
-    # Build results by variant
-    results = {
-        "experiment_id": experiment_id,
-        "experiment_name": experiment.name,
-        "total_users": len(set(a.user_id for a in assignments)),
-        "variants": {}
-    }
-
-    for variant in experiment.variants:
-        variant_assignments = [a for a in assignments if a.variant_id == variant.id]
-        variant_users = set(a.user_id for a in variant_assignments)
-
-        # Get events for users in this variant after their assignment
-        events_query = db.query(Event)
-        
-        if event_type:
-            events_query = events_query.filter(Event.event_type == event_type)
-
-        variant_events = []
-        for assignment in variant_assignments:
-            user_events = events_query.filter(
-                Event.user_id == assignment.user_id,
-                Event.timestamp >= assignment.created_at
-            ).all()
-            variant_events.extend(user_events)
-
-        # Count events by type
-        events_by_type = {}
-        for event in variant_events:
-            events_by_type[event.event_type] = events_by_type.get(event.event_type, 0) + 1
-
-        # Calculate conversion rate (users with at least one event)
-        users_with_events = set(e.user_id for e in variant_events)
-        conversion_rate = len(users_with_events) / len(variant_users) if variant_users else 0
-
-        results["variants"][variant.name] = {
-            "variant_id": variant.id,
-            "traffic_allocation": variant.traffic_allocation,
-            "user_count": len(variant_users),
-            "event_count": len(variant_events),
-            "events_by_type": events_by_type,
-            "conversion_rate": conversion_rate
+    df = pd.DataFrame([
+        {
+            "user_id": row.user_id,
+            "variant_name": row.name,
+            "event_id": row.id,
+            "event_type": row.event_type,
+            "properties": row.properties
         }
+        for row in event_data
+    ])
+    
+    df.drop_duplicates(subset=["event_id"], inplace=True)
+    user_count_by_variant_df = df.groupby('variant_name')['user_id'].nunique().reset_index()
+    user_count_by_variant_df.rename(columns={"user_id": "user_count"}, inplace=True)
+    user_count_by_variant_type_df = df.groupby(['variant_name', 'event_type'])['user_id'].nunique().reset_index()
+    user_count_by_variant_type_df.rename(columns={"user_id": "user_count_event_type"}, inplace=True)
 
-    # Add summary
-    total_events = sum(v["event_count"] for v in results["variants"].values())
-    avg_events = total_events / results["total_users"] if results["total_users"] > 0 else 0
+    agg_data = pd.merge(user_count_by_variant_df, user_count_by_variant_type_df, on='variant_name', how='left')
+    agg_data['conversion_rate'] = agg_data['user_count_event_type'] / agg_data['user_count']
 
-    results["summary"] = {
-        "total_events": total_events,
-        "average_events_per_user": avg_events
-    }
-
-    return results
-
+    return agg_data.to_dict("records")

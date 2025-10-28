@@ -6,3 +6,4 @@ pydantic>=2.10
 httpx==0.25.2
 pymysql==1.1.0
 cryptography==46.0.3
+pandas==2.3.3
